@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculador Termofluidodinámico Universal - Engine Dynamics</title>
+    <!-- html2canvas para generación limpia de imagen continua sin cortes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-color: #ff5722;
+            --text-color: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border-color: #333;
+            --input-bg: #2a2a2a;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 950px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+            font-size: 1.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            color: var(--accent-color);
+            border-bottom: 3px solid var(--accent-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 5px;
+        }
+
+        .input-group input, .input-group select {
+            padding: 10px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .input-group input:focus, .input-group select:focus {
+            border-color: var(--accent-color);
+            outline: none;
+        }
+
+        button.btn-calc {
+            width: 100%;
+            padding: 12px;
+            background: var(--accent-color);
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+        }
+
+        button.btn-calc:hover {
+            opacity: 0.9;
+        }
+
+        .results-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: #181818;
+            border-left: 4px solid var(--accent-color);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .results-box h3 {
+            margin-top: 0;
+            color: var(--accent-color);
+            font-size: 1.2rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .result-item {
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+        }
+
+        .result-item span.label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .result-item span.value {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #fff;
+            margin-top: 4px;
+        }
+
+        .note {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 15px;
+            line-height: 1.4;
+        }
+
+        .diagram-container {
+            width: 100%;
+            background: #0d0d0d;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        canvas {
+            background-color: #0d0d0d;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .btn-img-single {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 18px;
+            background: #2a2a2a;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-img-single:hover {
+            background: var(--accent-color);
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="main_container">
+    <h1>Calculador Termofluidodinámico Universal</h1>
+    <p class="subtitle">Sintonía de Admisión, Escape y Dinámica de Pulsos (Atmosférico / Turbo)</p>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('admision', event)">Admisión</button>
+        <button class="tab-btn" onclick="switchTab('escape', event)">Múltiple Escape</button>
+        <button class="tab-btn" onclick="switchTab('post-escape', event)">Línea Post-Escape</button>
+    </div>
+
+    <!-- PESTAÑA 1: ADMISIÓN -->
+    <div id="admision" class="tab-content active">
+        <div class="form-grid">
+            <div class="input-group">
+                <label>Tipo de Inducción</label>
+                <select id="adm_induc">
+                    <option value="na" selected>Aspiración Natural (NA)</option>
+                    <option value="turbo">Turbo / Sobrealimentado</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Arquitectura Motor</label>
+                <select id="adm_config">
+                    <option value="L3">3 en Línea</option>
+                    <option value="L4" selected>4 en Línea</option>
+                    <option value="L5">5 en Línea</option>
+                    <option value="L6">6 en Línea</option>
+                    <option value="V6">V6 (2 Bancadas)</option>
+                    <option value="V8">V8 (2 Bancadas)</option>
+                    <option value="V12">V12 (2 Bancadas)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Armónico de Sintonía</label>
+                <select id="adm_harmonic">
+                    <option value="2">2do Armónico (Competición / Alta RPM)</option>
+                    <option value="3" selected>3er Armónico (Uso Mixto / Deporte)</option>
+                    <option value="4">4to Armónico (Calle / Rango Medio)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Cilindrada Total (cc)</label>
+                <input type="number" id="adm_cc" value="1599">
+            </div>
+            <div class="input-group">
+                <label>Válvulas Admisión p/ Cilindro</label>
+                <select id="adm_n_valv">
+                    <option value="1" selected>1 Válvula (8v / 12v)</option>
+                    <option value="2">2 Válvulas (16v / 24v / 32v / 20v)</option>
+                    <option value="3">3 Válvulas (15v / 30v)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Diámetro Válvula Indiv. (mm)</label>
+                <input type="number" id="adm_valv" value="34.5" step="0.1">
+            </div>
+            <div class="input-group">
+                <label>RPM Objetivo</label>
+                <input type="number" id="adm_rpm" value="4000">
+            </div>
+            <div class="input-group">
+                <label>Duración Efectiva Admisión (@1mm °)</label>
+                <input type="number" id="adm_dur" value="196">
+            </div>
+            <div class="input-group">
+                <label>Modo Mariposa (TB)</label>
+                <select id="adm_mode_tb" onchange="toggleTBInput()">
+                    <option value="oem">Usar Mariposa OEM (mm)</option>
+                    <option value="calc">Calcular Mariposa Ideal</option>
+                </select>
+            </div>
+            <div class="input-group" id="tb_input_group">
+                <label>Diámetro Mariposa OEM (mm)</label>
+                <input type="number" id="adm_tb_custom" value="50">
+            </div>
+        </div>
+        <button class="btn-calc" onclick="calcularAdmision()">Calcular Admisión</button>
+
+        <div class="results-box" id="res_admision" style="display:none;">
+            <h3>Especificaciones Constructivas - Admisión</h3>
+            <div class="results-grid">
+                <div class="result-item">
+                    <span class="label">Válvula Equivalente (D_eq)</span>
+                    <span class="value" id="out_adm_Deq">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Largo Colector a Cortar (Fabricación)</span>
+                    <span class="value" id="out_adm_L">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Caño Comercial Sugerido (OD)</span>
+                    <span class="value" id="out_adm_D">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Volumen Pleno (por bancada)</span>
+                    <span class="value" id="out_adm_Vp">-</span>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <canvas id="canvas_admision" width="750" height="320"></canvas>
+            </div>
+
+            <p class="note" id="out_adm_note"></p>
+            <button class="btn-img-single" onclick="exportarSeccionImagen('admision', 'Ficha_Tecnica_Admision.png')">📷 Descargar Ficha como Imagen</button>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 2: MÚLTIPLE DE ESCAPE -->
+    <div id="escape" class="tab-content">
+        <div class="form-grid">
+            <div class="input-group">
+                <label>Tipo de Inducción</label>
+                <select id="esc_induc">
+                    <option value="na" selected>Aspiración Natural (NA)</option>
+                    <option value="turbo">Turbo / Sobrealimentado</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Arquitectura / Cilindros</label>
+                <select id="esc_config" onchange="actualizarOpcionesColector(); recalcularCCUnitaria();">
+                    <option value="2">2 Cilindros en Línea</option>
+                    <option value="3">3 Cilindros en Línea</option>
+                    <option value="4" selected>4 Cilindros en Línea</option>
+                    <option value="5">5 Cilindros en Línea</option>
+                    <option value="6">6 Cilindros (L6 / V6 por bancada)</option>
+                    <option value="8">8 Cilindros (V8 por bancada)</option>
+                    <option value="12">12 Cilindros (V12 por bancada)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Cilindrada Total Motor (cc)</label>
+                <input type="number" id="esc_cc_total" value="1599" oninput="recalcularCCUnitaria()">
+            </div>
+            <div class="input-group">
+                <label>Cilindrada Unitaria (cc)</label>
+                <input type="number" id="esc_cc_u" value="400" oninput="recalcularCCTotal()">
+            </div>
+            <div class="input-group">
+                <label>Válvulas Escape p/ Cilindro</label>
+                <select id="esc_n_valv">
+                    <option value="1" selected>1 Válvula (2v p/cil)</option>
+                    <option value="2">2 Válvulas (4v o 5v p/cil)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Diámetro Válvula Indiv. (mm)</label>
+                <input type="number" id="esc_valv" value="28.0" step="0.1">
+            </div>
+            <div class="input-group">
+                <label>RPM Objetivo</label>
+                <input type="number" id="esc_rpm" value="4000">
+            </div>
+            <div class="input-group">
+                <label>Apertura Escape BBDC (Antes PMI °)</label>
+                <input type="number" id="esc_bbdc" value="34.0">
+            </div>
+            <div class="input-group">
+                <label>Tipo de Colector</label>
+                <select id="esc_tipo">
+                    <!-- Opciones cargadas dinámicamente -->
+                </select>
+            </div>
+        </div>
+        <button class="btn-calc" onclick="calcularEscape()">Calcular Múltiple Escape</button>
+
+        <div class="results-box" id="res_escape" style="display:none;">
+            <h3>Especificaciones Constructivas - Headers / Múltiple</h3>
+            <div class="results-grid">
+                <div class="result-item">
+                    <span class="label">Válvula Escape Eq. (D_eq)</span>
+                    <span class="value" id="out_esc_Deq">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Largo Caño Primarios (a Cortar)</span>
+                    <span class="value" id="out_esc_L1">-</span>
+                </div>
+                <div class="result-item" id="box_esc_L2" style="display:none;">
+                    <span class="label">Largo Secundarios (L2)</span>
+                    <span class="value" id="out_esc_L2">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Caño Primario Comercial (OD)</span>
+                    <span class="value" id="out_esc_D1">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Caño Salida / Colector (OD)</span>
+                    <span class="value" id="out_esc_Dc">-</span>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <canvas id="canvas_escape" width="750" height="320"></canvas>
+            </div>
+
+            <p class="note" id="out_esc_note"></p>
+            <button class="btn-img-single" onclick="exportarSeccionImagen('escape', 'Ficha_Tecnica_Multiple_Escape.png')">📷 Descargar Ficha como Imagen</button>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 3: LÍNEA POST-ESCAPE -->
+    <div id="post-escape" class="tab-content">
+        <div class="form-grid">
+            <div class="input-group">
+                <label>Tipo de Inducción</label>
+                <select id="post_induc">
+                    <option value="na" selected>Aspiración Natural (NA)</option>
+                    <option value="turbo">Turbo / Sobrealimentado</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Potencia Estimada (HP)</label>
+                <input type="number" id="post_hp" value="101">
+            </div>
+            <div class="input-group">
+                <label>RPM Sintonía Baja/Media</label>
+                <input type="number" id="post_rpm" value="2500">
+            </div>
+            <div class="input-group">
+                <label>Temperatura Prom. Gas (°C)</label>
+                <input type="number" id="post_temp" value="500">
+            </div>
+        </div>
+        <button class="btn-calc" onclick="calcularPostEscape()">Calcular Línea Post-Múltiple</button>
+
+        <div class="results-box" id="res_post" style="display:none;">
+            <h3>Especificaciones Constructivas - Tubería y Cámaras</h3>
+            <div class="results-grid">
+                <div class="result-item">
+                    <span class="label">Diámetro Tubería Recomendado</span>
+                    <span class="value" id="out_post_D">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Ubicación 1ª Cámara (Resonador)</span>
+                    <span class="value" id="out_post_pos1">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Volumen Sugerido 1ª Cámara</span>
+                    <span class="value" id="out_post_vol1">-</span>
+                </div>
+                <div class="result-item">
+                    <span class="label">Ubicación 2ª Cámara (Silenciador)</span>
+                    <span class="value" id="out_post_pos2">-</span>
+                </div>
+            </div>
+
+            <div class="diagram-container">
+                <canvas id="canvas_post" width="750" height="280"></canvas>
+            </div>
+
+            <p class="note" id="out_post_note"></p>
+            <button class="btn-img-single" onclick="exportarSeccionImagen('post-escape', 'Ficha_Tecnica_Linea_Post_Escape.png')">📷 Descargar Ficha como Imagen</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        actualizarOpcionesColector();
+    };
+
+    function switchTab(tabId, evt) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById(tabId).classList.add('active');
+        if (evt && evt.currentTarget) {
+            evt.currentTarget.classList.add('active');
+        }
+    }
+
+    function toggleTBInput() {
+        let mode = document.getElementById('adm_mode_tb').value;
+        let inputGroup = document.getElementById('tb_input_group');
+        inputGroup.style.display = (mode === 'oem') ? 'flex' : 'none';
+    }
+
+    function matchCommercialTubing(dInt_mm) {
+        const wallThickness = 1.5; 
+        const tubingList = [
+            { od_inch: '1-1/4"', od_mm: 31.75 },
+            { od_inch: '1-3/8"', od_mm: 34.93 },
+            { od_inch: '1-1/2"', od_mm: 38.10 },
+            { od_inch: '1-5/8"', od_mm: 41.28 },
+            { od_inch: '1-7/8"', od_mm: 47.63 },
+            { od_inch: '2.00"',  od_mm: 50.80 },
+            { od_inch: '2-1/4"', od_mm: 57.15 },
+            { od_inch: '2-1/2"', od_mm: 63.50 },
+            { od_inch: '3.00"',  od_mm: 76.20 },
+            { od_inch: '3.50"',  od_mm: 88.90 }
+        ];
+
+        let targetOD = dInt_mm + (wallThickness * 2);
+        let bestMatch = tubingList[0];
+        let minDiff = Math.abs(targetOD - tubingList[0].od_mm);
+
+        for (let i = 1; i < tubingList.length; i++) {
+            let diff = Math.abs(targetOD - tubingList[i].od_mm);
+            if (diff < minDiff) {
+                minDiff = diff;
+                bestMatch = tubingList[i];
+            }
+        }
+        let actualID = bestMatch.od_mm - (wallThickness * 2);
+        return {
+            label: `${bestMatch.od_inch} (OD: ${bestMatch.od_mm.toFixed(1)}mm)`,
+            id_mm: actualID
+        };
+    }
+
+    function drawDimension(ctx, x1, y1, x2, y2, text, offset = 20, isVertical = false) {
+        ctx.strokeStyle = '#ff5722';
+        ctx.fillStyle = '#ff5722';
+        ctx.lineWidth = 1.5;
+        ctx.font = 'bold 12px Segoe UI, sans-serif';
+
+        if (!isVertical) {
+            let y = y1 - offset;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1); ctx.lineTo(x1, y - 5);
+            ctx.moveTo(x2, y2); ctx.lineTo(x2, y - 5);
+            ctx.moveTo(x1, y); ctx.lineTo(x2, y);
+            ctx.moveTo(x1, y); ctx.lineTo(x1 + 6, y - 3); ctx.lineTo(x1 + 6, y + 3);
+            ctx.moveTo(x2, y); ctx.lineTo(x2 - 6, y - 3); ctx.lineTo(x2 - 6, y + 3);
+            ctx.stroke();
+
+            ctx.textAlign = 'center';
+            ctx.fillText(text, (x1 + x2) / 2, y - 5);
+        } else {
+            let x = x1 + offset;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1); ctx.lineTo(x + 5, y1);
+            ctx.moveTo(x2, y2); ctx.lineTo(x + 5, y2);
+            ctx.moveTo(x, y1); ctx.lineTo(x, y2);
+            ctx.moveTo(x, y1); ctx.lineTo(x - 3, y1 + 6); ctx.lineTo(x + 3, y1 + 6);
+            ctx.moveTo(x, y2); ctx.lineTo(x - 3, y2 - 6); ctx.lineTo(x + 3, y2 + 6);
+            ctx.stroke();
+
+            ctx.textAlign = 'left';
+            ctx.fillText(text, x + 8, (y1 + y2) / 2 + 4);
+        }
+    }
+
+    function recalcularCCUnitaria() {
+        let numCil = parseInt(document.getElementById('esc_config').value);
+        let ccTotal = parseFloat(document.getElementById('esc_cc_total').value);
+        if (ccTotal && numCil) {
+            let ccU = (ccTotal / numCil).toFixed(1);
+            document.getElementById('esc_cc_u').value = ccU;
+        }
+    }
+
+    function recalcularCCTotal() {
+        let numCil = parseInt(document.getElementById('esc_config').value);
+        let ccU = parseFloat(document.getElementById('esc_cc_u').value);
+        if (ccU && numCil) {
+            let ccTotal = Math.round(ccU * numCil);
+            document.getElementById('esc_cc_total').value = ccTotal;
+        }
+    }
+
+    function actualizarOpcionesColector() {
+        let numCil = parseInt(document.getElementById('esc_config').value);
+        let selectTipo = document.getElementById('esc_tipo');
+        selectTipo.innerHTML = '';
+
+        let opt1 = document.createElement('option');
+        opt1.value = 'n-1';
+        opt1.text = numCil + '-1 Colector Directo (Alta RPM / Colector Único)';
+        selectTipo.appendChild(opt1);
+
+        if ([4, 6, 8, 12].includes(numCil)) {
+            let opt2 = document.createElement('option');
+            opt2.value = 'tri-y';
+            if (numCil === 4) opt2.text = '4-2-1 Tri-Y (Rango Medio Amplio)';
+            else if (numCil === 6) opt2.text = '6-2-1 Tri-Y (Doble Cascada)';
+            else if (numCil === 8) opt2.text = '8-4-2-1 Tri-Y / 4-1 Por Bancada';
+            else if (numCil === 12) opt2.text = '12-6-2-1 Tri-Y / Multicascada';
+            selectTipo.appendChild(opt2);
+        }
+    }
+
+    // --- ADMISIÓN ---
+    function calcularAdmision() {
+        let induc = document.getElementById('adm_induc').value;
+        let config = document.getElementById('adm_config').value;
+        let harmonic = parseInt(document.getElementById('adm_harmonic').value);
+        let ccTotal = parseFloat(document.getElementById('adm_cc').value);
+        let nValv = parseInt(document.getElementById('adm_n_valv').value);
+        let dValvInd = parseFloat(document.getElementById('adm_valv').value);
+        let rpm = parseFloat(document.getElementById('adm_rpm').value);
+        let dur = parseFloat(document.getElementById('adm_dur').value);
+        let modeTB = document.getElementById('adm_mode_tb').value;
+
+        let headLen = (nValv === 1) ? (dValvInd * 2.3) : (dValvInd * 1.95);
+
+        let numCil = 4;
+        let bancadas = 1;
+        if (config === 'L3') numCil = 3;
+        else if (config === 'L5') numCil = 5;
+        else if (config === 'L6') numCil = 6;
+        else if (config === 'V6') { numCil = 6; bancadas = 2; }
+        else if (config === 'V8') { numCil = 8; bancadas = 2; }
+        else if (config === 'V12') { numCil = 12; bancadas = 2; }
+
+        let ccPorBancada = ccTotal / bancadas;
+        let dValvEq = dValvInd * Math.sqrt(nValv);
+
+        let harmonicFactor = harmonic / 3; 
+        let L_total_acustico = ((1080000 / (rpm * (dur / 250))) - 50) * harmonicFactor; 
+        if (induc === 'turbo') L_total_acustico *= 0.75; 
+
+        let L_fabricar = L_total_acustico - headLen;
+        if (L_fabricar < 30) L_fabricar = 30;
+
+        let kRunner = (nValv === 1) ? 0.78 : 0.82;
+        let dRunner_teorico = dValvEq * kRunner; 
+        let tubingMatch = matchCommercialTubing(dRunner_teorico);
+
+        let dTB_mm = 0;
+        let vPlenum_L = 0;
+        let kPlenum = (induc === 'turbo') ? 1.8 : 1.25;
+
+        if (modeTB === 'oem') {
+            dTB_mm = parseFloat(document.getElementById('adm_tb_custom').value);
+            let dIdeal = Math.sqrt((ccPorBancada * rpm) / 18000) * 2.1;
+            let ratioTB = dIdeal / dTB_mm;
+            if (ratioTB < 0.8) ratioTB = 0.8; 
+            vPlenum_L = ((ccPorBancada * kPlenum) / 1000) * Math.pow(ratioTB, 1.2);
+        } else {
+            dTB_mm = Math.sqrt((ccPorBancada * rpm) / 18000) * 2.1;
+            vPlenum_L = (ccPorBancada * kPlenum) / 1000;
+        }
+
+        let labelHarmonic = (harmonic === 2) ? "2º Armónico (Alta RPM)" : (harmonic === 4) ? "4º Armónico (Rango Medio)" : "3er Armónico (Uso Mixto)";
+        let notaText = "* Largo Acústico Total: " + Math.round(L_total_acustico) + "mm. Descontando puerto de culata estimado (" + Math.round(headLen) + "mm), el caño a fabricar es de " + Math.round(L_fabricar) + "mm. " + labelHarmonic + ".";
+
+        document.getElementById('out_adm_Deq').innerText = dValvEq.toFixed(1) + " mm (" + nValv + "x " + dValvInd.toFixed(1) + "mm)";
+        document.getElementById('out_adm_L').innerText = Math.round(L_fabricar) + " mm";
+        document.getElementById('out_adm_D').innerText = tubingMatch.label;
+        document.getElementById('out_adm_Vp').innerText = vPlenum_L.toFixed(2) + " Litros";
+        document.getElementById('out_adm_note').innerText = notaText;
+
+        document.getElementById('res_admision').style.display = 'block';
+
+        renderEsquemaAdmisionMulti(Math.round(L_fabricar), tubingMatch.id_mm.toFixed(1), Math.round(dTB_mm), vPlenum_L.toFixed(2), numCil / bancadas);
+    }
+
+    function renderEsquemaAdmisionMulti(L, D, TB, Vp, numCil) {
+        let cv = document.getElementById('canvas_admision');
+        let ctx = cv.getContext('2d');
+        ctx.clearRect(0, 0, cv.width, cv.height);
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.fillStyle = '#222';
+
+        let topY = 40;
+        let bottomY = 280;
+        let heightPlenum = bottomY - topY;
+        let xPlenumStart = 110;
+        let xPlenumEnd = 310;
+        let plenumWidth = xPlenumEnd - xPlenumStart;
+
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(xPlenumStart, topY, plenumWidth, heightPlenum, 15);
+        } else {
+            ctx.rect(xPlenumStart, topY, plenumWidth, heightPlenum);
+        }
+        ctx.fill(); ctx.stroke();
+
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 13px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.fillText("PLENO (" + Vp + "L)", xPlenumStart + plenumWidth/2, topY + heightPlenum/2 - 5);
+        ctx.fillStyle = '#aaa';
+        ctx.font = '11px Segoe UI';
+        ctx.fillText(numCil + " Cil/Bancada", xPlenumStart + plenumWidth/2, topY + heightPlenum/2 + 12);
+
+        let tbY = topY + heightPlenum/2 - 25;
+        ctx.fillStyle = '#333';
+        ctx.fillRect(40, tbY, 70, 50);
+        ctx.strokeRect(40, tbY, 70, 50);
+        
+        ctx.strokeStyle = '#ff5722';
+        ctx.beginPath(); ctx.moveTo(75, tbY - 5); ctx.lineTo(75, tbY + 55); ctx.stroke(); ctx.strokeStyle = '#e0e0e0';
+
+        let runnerSpacing = heightPlenum / (numCil + 1);
+        let runnerThickness = Math.min(18, Math.max(6, 120 / numCil));
+        let xRunnerStart = xPlenumEnd;
+        let xFlange = 600;
+
+        ctx.fillStyle = '#444';
+        ctx.fillRect(xFlange, topY - 10, 15, heightPlenum + 20);
+        ctx.strokeRect(xFlange, topY - 10, 15, heightPlenum + 20);
+
+        let firstRunnerY = 0;
+
+        for (let i = 1; i <= numCil; i++) {
+            let centerY = topY + (i * runnerSpacing);
+            let rTop = centerY - runnerThickness / 2;
+            let rBottom = centerY + runnerThickness / 2;
+
+            if (i === 1) firstRunnerY = centerY;
+
+            ctx.fillStyle = '#2a2a2a';
+            ctx.beginPath();
+            ctx.moveTo(xRunnerStart, rTop);
+            ctx.lineTo(xFlange, rTop - 2);
+            ctx.lineTo(xFlange, rBottom + 2);
+            ctx.lineTo(xRunnerStart, rBottom);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(xRunnerStart, rTop - 3, 4, 0, Math.PI);
+            ctx.arc(xRunnerStart, rBottom + 3, 4, 0, Math.PI, true);
+            ctx.stroke();
+        }
+
+        drawDimension(ctx, xRunnerStart, topY, xFlange, topY, "Largo a Fabricar: " + L + " mm", 25);
+        drawDimension(ctx, xFlange, firstRunnerY - runnerThickness/2, xFlange, firstRunnerY + runnerThickness/2, "Ø Int: " + D + " mm", 25, true);
+        drawDimension(ctx, 40, tbY, 40, tbY + 50, "TB: Ø " + TB + " mm", -25, true);
+    }
+
+    // --- ESCAPE ---
+    function calcularEscape() {
+        let induc = document.getElementById('esc_induc').value;
+        let numCil = parseInt(document.getElementById('esc_config').value);
+        let ccUnit = parseFloat(document.getElementById('esc_cc_u').value);
+        let nValvEsc = parseInt(document.getElementById('esc_n_valv').value);
+        let dValvEscInd = parseFloat(document.getElementById('esc_valv').value);
+        let rpm = parseFloat(document.getElementById('esc_rpm').value);
+        let bbdc = parseFloat(document.getElementById('esc_bbdc').value);
+        let tipo = document.getElementById('esc_tipo').value;
+
+        let headLen = (nValvEsc === 1) ? (dValvEscInd * 2.2) : (dValvEscInd * 1.8);
+
+        let dValvEscEq = dValvEscInd * Math.sqrt(nValvEsc);
+        let degEv = 180 + bbdc;
+        
+        let tempGas = (induc === 'turbo') ? 850 : 700; 
+        let speedSound = 20.05 * Math.sqrt(tempGas + 273.15); 
+        
+        let L1_total_acustico = Math.round(((degEv * (speedSound * 1.35)) / rpm) * 10);
+        if (induc === 'turbo') L1_total_acustico = Math.round(L1_total_acustico * 0.65); 
+
+        let L1_fabricar = L1_total_acustico - headLen;
+        if (L1_fabricar < 50) L1_fabricar = 50;
+
+        let kD1 = (induc === 'turbo') ? 0.85 : 0.95;
+        let d1_teorico = dValvEscEq * kD1;
+        let tubingD1 = matchCommercialTubing(d1_teorico);
+
+        let factorColector = Math.sqrt(numCil / 2.0) * 0.85;
+        if (factorColector < 1.2) factorColector = 1.25;
+
+        let dCollector_teorico = (tipo === 'tri-y') ? (d1_teorico * 1.35) : (d1_teorico * factorColector);
+        let tubingDc = matchCommercialTubing(dCollector_teorico);
+
+        let L2_mm = (tipo === 'tri-y') ? Math.round(L1_fabricar * 0.5) : 0;
+
+        let notaText = "* Largo Acústico Total: " + L1_total_acustico + "mm. Descontando puerto de culata estimado (" + Math.round(headLen) + "mm), cortar primarios a " + Math.round(L1_fabricar) + "mm. Diámetros ajustados a Tubing Comercial Gauge 16 (1.5mm).";
+
+        document.getElementById('out_esc_Deq').innerText = dValvEscEq.toFixed(1) + " mm (" + nValvEsc + "x " + dValvEscInd.toFixed(1) + "mm)";
+        document.getElementById('out_esc_L1').innerText = Math.round(L1_fabricar) + " mm";
+        
+        let boxL2 = document.getElementById('box_esc_L2');
+        if (tipo === 'tri-y') {
+            boxL2.style.display = 'block';
+            document.getElementById('out_esc_L2').innerText = L2_mm + " mm";
+        } else {
+            boxL2.style.display = 'none';
+        }
+
+        document.getElementById('out_esc_D1').innerText = tubingD1.label;
+        document.getElementById('out_esc_Dc').innerText = tubingDc.label;
+        document.getElementById('out_esc_note').innerText = notaText;
+
+        document.getElementById('res_escape').style.display = 'block';
+
+        renderEsquemaEscapeDinamico(Math.round(L1_fabricar), tubingD1.id_mm.toFixed(1), tubingDc.id_mm.toFixed(1), tipo, L2_mm, numCil);
+    }
+
+    function renderEsquemaEscapeDinamico(L1, D1, Dc, tipo, L2, numCil) {
+        let cv = document.getElementById('canvas_escape');
+        let ctx = cv.getContext('2d');
+        ctx.clearRect(0, 0, cv.width, cv.height);
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.fillStyle = '#222';
+
+        let startX = 60;
+        let flangeWidth = 20;
+        let canvasHeight = cv.height;
+
+        let topY = 45;
+        let bottomY = canvasHeight - 25;
+        let totalHeight = bottomY - topY;
+
+        ctx.fillStyle = '#444';
+        ctx.fillRect(startX, topY, flangeWidth, totalHeight);
+        ctx.strokeRect(startX, topY, flangeWidth, totalHeight);
+
+        let x1 = startX + flangeWidth;
+        let spacing = totalHeight / (numCil + 1);
+
+        if (tipo === 'n-1') {
+            let xCollector = 400;
+            let xEnd = 580;
+            let collectorYTop = canvasHeight / 2 - 20;
+            let collectorYBottom = canvasHeight / 2 + 20;
+
+            ctx.beginPath();
+            for (let i = 1; i <= numCil; i++) {
+                let yStart = topY + (i * spacing);
+                let yTarget = collectorYTop + ((i - 1) * (40 / (numCil - 1 || 1)));
+                ctx.moveTo(x1, yStart);
+                ctx.lineTo(xCollector, yTarget);
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = '#2a2a2a';
+            ctx.beginPath();
+            ctx.moveTo(xCollector, collectorYTop - 10);
+            ctx.lineTo(xCollector + 80, collectorYTop);
+            ctx.lineTo(xEnd, collectorYTop);
+            ctx.lineTo(xEnd, collectorYBottom);
+            ctx.lineTo(xCollector + 80, collectorYBottom);
+            ctx.lineTo(xCollector, collectorYBottom + 10);
+            ctx.closePath();
+            ctx.fill(); ctx.stroke();
+
+            drawDimension(ctx, x1, topY, xCollector, topY, "L1 Primarios: " + L1 + " mm", 15);
+            drawDimension(ctx, x1 + 60, topY + spacing, x1 + 60, topY + spacing + 12, "Ø " + D1 + " mm", -10, true);
+            drawDimension(ctx, xEnd, collectorYTop, xEnd, collectorYBottom, "Ø " + Dc + " mm", 15, true);
+
+        } else {
+            let xSec = 280;
+            let xColl = 440;
+            let xEnd = 580;
+
+            let numPairs = Math.ceil(numCil / 2);
+            let secSpacing = totalHeight / (numPairs + 1);
+
+            ctx.beginPath();
+            for (let i = 1; i <= numCil; i++) {
+                let yStart = topY + (i * spacing);
+                let pairIndex = Math.ceil(i / 2);
+                let ySecTarget = topY + (pairIndex * secSpacing);
+                ctx.moveTo(x1, yStart);
+                ctx.lineTo(xSec, ySecTarget);
+            }
+            ctx.stroke();
+
+            ctx.beginPath();
+            for (let j = 1; j <= numPairs; j++) {
+                let ySecStart = topY + (j * secSpacing);
+                ctx.moveTo(xSec, ySecStart);
+                ctx.lineTo(xColl, canvasHeight / 2);
+            }
+            ctx.stroke();
+
+            ctx.fillStyle = '#2a2a2a';
+            ctx.beginPath();
+            ctx.moveTo(xColl, canvasHeight / 2 - 20);
+            ctx.lineTo(xColl + 60, canvasHeight / 2 - 12);
+            ctx.lineTo(xEnd, canvasHeight / 2 - 12);
+            ctx.lineTo(xEnd, canvasHeight / 2 + 12);
+            ctx.lineTo(xColl + 60, canvasHeight / 2 + 12);
+            ctx.lineTo(xColl, canvasHeight / 2 + 20);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+
+            drawDimension(ctx, x1, topY, xSec, topY, "L1 Primarios: " + L1 + " mm", 15);
+            drawDimension(ctx, xSec, topY, xColl, topY, "L2 Secundarios: " + L2 + " mm", 15);
+            drawDimension(ctx, x1 + 60, topY + spacing, x1 + 60, topY + spacing + 12, "Ø " + D1 + " mm", -10, true);
+            drawDimension(ctx, xEnd, canvasHeight / 2 - 12, xEnd, canvasHeight / 2 + 12, "Ø " + Dc + " mm", 15, true);
+        }
+    }
+
+    // --- LÍNEA POST-ESCAPE ---
+    function calcularPostEscape() {
+        let induc = document.getElementById('post_induc').value;
+        let hp = parseFloat(document.getElementById('post_hp').value);
+        let rpm = parseFloat(document.getElementById('post_rpm').value);
+        let temp = parseFloat(document.getElementById('post_temp').value);
+
+        let divisorHP = (induc === 'turbo') ? 22 : 32;
+        let dPipe_Inches = Math.sqrt(hp / divisorHP); 
+
+        let dComm = '2.00" (50.8mm)';
+        if (dPipe_Inches < 1.85) {
+            dComm = '1.75" (44.5mm)';
+        } else if (dPipe_Inches >= 1.85 && dPipe_Inches <= 2.15) {
+            dComm = '2.00" (50.8mm)';
+        } else if (dPipe_Inches > 2.15 && dPipe_Inches <= 2.60) {
+            dComm = '2.25" (57.0mm)';
+        } else if (dPipe_Inches > 2.60 && dPipe_Inches <= 3.10) {
+            dComm = '2.50" (63.5mm)';
+        } else {
+            dComm = '3.00" (76.0mm)';
+        }
+
+        let speedOfSound_m_s = 20.05 * Math.sqrt(temp + 273.15);
+        let pos1_cm = ((speedOfSound_m_s / (4 * (rpm / 60))) * 0.42) * 100;
+        let vol1_L = (hp * 0.025);
+
+        let notaText = "* Línea calibrada a temperatura media de " + temp + "°C. La distancia se mide desde la salida del colector/turbina hasta la entrada de la 1ª cámara.";
+
+        document.getElementById('out_post_D').innerText = dComm;
+        document.getElementById('out_post_pos1').innerText = Math.round(pos1_cm) + " cm";
+        document.getElementById('out_post_vol1').innerText = vol1_L.toFixed(1) + " Litros";
+        document.getElementById('out_post_pos2').innerText = "Al extremo final (Salida del chasis)";
+        document.getElementById('out_post_note').innerText = notaText;
+
+        document.getElementById('res_post').style.display = 'block';
+
+        renderEsquemaPost(Math.round(pos1_cm), dComm, vol1_L.toFixed(1));
+    }
+
+    function renderEsquemaPost(pos1, dComm, vol1) {
+        let cv = document.getElementById('canvas_post');
+        let ctx = cv.getContext('2d');
+        ctx.clearRect(0, 0, cv.width, cv.height);
+
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#e0e0e0';
+        ctx.fillStyle = '#222';
+
+        ctx.fillStyle = '#ff5722';
+        ctx.fillRect(50, 120, 15, 40);
+
+        ctx.fillStyle = '#333';
+        ctx.fillRect(65, 130, 220, 20);
+        ctx.strokeRect(65, 130, 220, 20);
+
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(285, 105, 130, 70, 8);
+        } else {
+            ctx.rect(285, 105, 130, 70);
+        }
+        ctx.fill(); ctx.stroke();
+
+        ctx.strokeStyle = '#ff5722';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(285, 130); ctx.lineTo(415, 130);
+        ctx.moveTo(285, 150); ctx.lineTo(415, 150);
+        ctx.stroke();
+        ctx.setLineDash([]); 
+        ctx.strokeStyle = '#e0e0e0';
+
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.fillText("1ª CÁMARA (PASANTE)", 350, 123);
+        ctx.font = '11px Segoe UI'; ctx.fillStyle = '#aaa';
+        ctx.fillText(vol1 + "L (Núcleo Perforado)", 350, 162);
+
+        ctx.fillStyle = '#333';
+        ctx.fillRect(415, 130, 150, 20);
+        ctx.strokeRect(415, 130, 150, 20);
+
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(565, 100, 120, 80, 8);
+        } else {
+            ctx.rect(565, 100, 120, 80);
+        }
+        ctx.fill(); ctx.stroke();
+        
+        ctx.strokeStyle = '#ff5722';
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(565, 130); ctx.lineTo(685, 130);
+        ctx.moveTo(565, 150); ctx.lineTo(685, 150);
+        ctx.stroke();
+        ctx.setLineDash([]); 
+        ctx.strokeStyle = '#e0e0e0';
+
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 12px Segoe UI';
+        ctx.fillText("SILENCIADOR PASANTE", 625, 123);
+        ctx.font = '11px Segoe UI'; ctx.fillStyle = '#aaa';
+        ctx.fillText("Flujo Directo", 625, 162);
+
+        ctx.fillStyle = '#333';
+        ctx.fillRect(685, 133, 30, 14);
+        ctx.strokeRect(685, 133, 30, 14);
+
+        drawDimension(ctx, 50, 120, 285, 105, "Ubicación Resonador: " + pos1 + " cm", 45);
+        drawDimension(ctx, 150, 130, 150, 150, "Tubería: " + dComm, -25, true);
+    }
+
+    // --- FUNCIÓN DE EXPORTACIÓN A IMAGEN PNG CONTINUA ---
+    function exportarSeccionImagen(elementId, fileName) {
+        let originalTab = document.getElementById(elementId);
+
+        // 1. Clonar pestaña original
+        let clone = originalTab.cloneNode(true);
+
+        // Ocultar botones de cálculo y descarga en la imagen
+        let btnImg = clone.querySelector('.btn-img-single');
+        if (btnImg) btnImg.style.display = 'none';
+        let btnCalc = clone.querySelector('.btn-calc');
+        if (btnCalc) btnCalc.style.display = 'none';
+
+        // 2. Mapear datos de entrada actualizados
+        let origInputs = originalTab.querySelectorAll('input, select');
+        let cloneInputs = clone.querySelectorAll('input, select');
+
+        origInputs.forEach((input, index) => {
+            let cloneInput = cloneInputs[index];
+            if (!cloneInput) return;
+
+            let valueText = (input.tagName === 'SELECT') 
+                ? input.options[input.selectedIndex].text 
+                : input.value;
+
+            let label = input.previousElementSibling ? input.previousElementSibling.innerText : '';
+            let wrapper = document.createElement('div');
+            wrapper.className = 'input-group';
+            wrapper.innerHTML = `<label style="color:#a0a0a0; font-size:0.8rem; display:block; margin-bottom:4px;">${label}</label>` +
+                                `<div style="padding:8px 10px; background:#2a2a2a; border:1px solid #333; border-radius:6px; color:#fff; font-size:0.9rem; font-weight:bold;">${valueText}</div>`;
+            
+            if (cloneInput.parentNode) {
+                cloneInput.parentNode.parentNode.replaceChild(wrapper, cloneInput.parentNode);
+            }
+        });
+
+        // 3. Reemplazar Canvas dinámico por una imagen PNG HD en el clon
+        let origCanvas = originalTab.querySelector('canvas');
+        let cloneCanvas = clone.querySelector('canvas');
+
+        if (origCanvas && cloneCanvas) {
+            let img = document.createElement('img');
+            img.src = origCanvas.toDataURL('image/png');
+            img.style.width = '100%';
+            img.style.maxWidth = '750px';
+            img.style.height = 'auto';
+            img.style.backgroundColor = '#0d0d0d';
+            img.style.borderRadius = '8px';
+            img.style.display = 'block';
+            img.style.margin = '15px auto';
+            cloneCanvas.parentNode.replaceChild(img, cloneCanvas);
+        }
+
+        let resultsBox = clone.querySelector('.results-box');
+        if (resultsBox) resultsBox.style.display = 'block';
+
+        // 4. Crear contenedor temporal con ancho estático para garantizar nitidez visual
+        let renderContainer = document.createElement('div');
+        renderContainer.style.position = 'absolute';
+        renderContainer.style.left = '-9999px';
+        renderContainer.style.top = '0';
+        renderContainer.style.width = '850px';
+        renderContainer.style.padding = '25px';
+        renderContainer.style.background = '#121212';
+        renderContainer.style.color = '#e0e0e0';
+        renderContainer.style.fontFamily = 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif';
+
+        let titleText = elementId === 'admision' ? 'REPORTE Y FICHA TÉCNICA - ADMISIÓN' : 
+                        elementId === 'escape' ? 'REPORTE Y FICHA TÉCNICA - MÚLTIPLE ESCAPE' : 'REPORTE Y FICHA TÉCNICA - LÍNEA POST-ESCAPE';
+
+        let header = document.createElement('div');
+        header.style.marginBottom = '20px';
+        header.style.borderBottom = '2px solid #ff5722';
+        header.style.paddingBottom = '10px';
+        header.innerHTML = `<h1 style="color:#ff5722; text-align:center; font-size: 1.5rem; margin:0 0 5px 0; text-transform:uppercase;">${titleText}</h1>` +
+                           `<p style="color:#a0a0a0; text-align:center; font-size:0.85rem; margin:0;">Calculador Termofluidodinámico Universal - Engine Dynamics</p>`;
+
+        renderContainer.appendChild(header);
+        renderContainer.appendChild(clone);
+        document.body.appendChild(renderContainer);
+
+        // 5. Renderizado HD con html2canvas y descarga automática
+        html2canvas(renderContainer, {
+            backgroundColor: '#121212',
+            scale: 2,
+            useCORS: true
+        }).then(canvas => {
+            let link = document.createElement('a');
+            link.download = fileName;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            document.body.removeChild(renderContainer);
+        });
+    }
+</script>
+
+</body>
+</html>
